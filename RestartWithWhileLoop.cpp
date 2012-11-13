@@ -3,55 +3,48 @@
 #include <QApplication>
 #include <QDebug>
 #include <QObject>
-#include <QVBoxLayout>
-#include <QPushButton>
+
+#include "ctkAbstractRestartManager.h"
+#include "ctkRestartWidget.h"
 
 // See https://qt-project.org/wiki/ApplicationRestart
 
 
 //-----------------------------------------------------------------------------
-class RestartManager : public QObject
+class ctkRestartManager : public ctkAbstractRestartManager
 {
   Q_OBJECT
 public:
-  typedef RestartManager Self;
-  RestartManager(QObject * parent = 0) : QObject(parent){}
-  virtual ~RestartManager(){}
+  typedef ctkRestartManager Self;
+  typedef ctkAbstractRestartManager Superclass;
+  ctkRestartManager(QObject * parent = 0) : Superclass(parent){}
+  virtual ~ctkRestartManager(){}
   
   static int const EXIT_CODE_REBOOT;
   
 public slots:
   void restart()
   {
-    qDebug() << "Restarting ...";
+    this->Superclass::restart();
     QCoreApplication::exit(Self::EXIT_CODE_REBOOT);
   }
 private:
-  Q_DISABLE_COPY(RestartManager);
+  Q_DISABLE_COPY(ctkRestartManager);
 };
 
 //-----------------------------------------------------------------------------
-int const RestartManager::EXIT_CODE_REBOOT = -123456789;
+int const ctkRestartManager::EXIT_CODE_REBOOT = -123456789;
 
 //-----------------------------------------------------------------------------
 int mainLoop(int argc, char*argv[])
 {
   QApplication app(argc, argv);
   
-  QWidget topLevel;
-  QVBoxLayout * layout = new QVBoxLayout();
-  topLevel.setLayout(layout);
+  ctkRestartManager restartManager;
+  ctkRestartWidget restartWidget;
+  restartWidget.setRestartManager(&restartManager);
   
-  QPushButton * restartButton = new QPushButton("Restart");
-  RestartManager restartManager;
-  QObject::connect(restartButton, SIGNAL(clicked()), &restartManager, SLOT(restart()));
-  layout->addWidget(restartButton);
-  
-  QPushButton * quitButton = new QPushButton("Quit");
-  QObject::connect(quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
-  layout->addWidget(quitButton);
-  
-  topLevel.show();
+  restartWidget.show();
     
   return app.exec();
 }
@@ -64,7 +57,7 @@ int main(int argc, char*argv[])
     {
     currentExitCode = mainLoop(argc, argv);
     }
-  while(currentExitCode == RestartManager::EXIT_CODE_REBOOT);
+  while(currentExitCode == ctkRestartManager::EXIT_CODE_REBOOT);
 
   return currentExitCode;
 }

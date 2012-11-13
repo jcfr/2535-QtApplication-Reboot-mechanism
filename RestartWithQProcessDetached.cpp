@@ -4,26 +4,28 @@
 #include <QDebug>
 #include <QObject>
 #include <QProcess>
-#include <QVBoxLayout>
-#include <QPushButton>
+
+#include "ctkAbstractRestartManager.h"
+#include "ctkRestartWidget.h"
 
 //-----------------------------------------------------------------------------
-class RestartManager : public QObject
+class ctkRestartManager : public ctkAbstractRestartManager
 {
   Q_OBJECT
 public:
-  RestartManager(QObject * parent = 0) : QObject(parent){}
-  virtual ~RestartManager(){}
+  typedef ctkAbstractRestartManager Superclass;
+  ctkRestartManager(QObject * parent = 0) : Superclass(parent){}
+  virtual ~ctkRestartManager(){}
 public slots:
   void restart()
   {
-    qDebug() << "Restarting ...";
+    this->Superclass::restart();
     QCoreApplication * coreApp = QCoreApplication::instance();
     QProcess::startDetached(coreApp->applicationFilePath(), coreApp->arguments());
     QCoreApplication::quit();
   }
 private:
-  Q_DISABLE_COPY(RestartManager);
+  Q_DISABLE_COPY(ctkRestartManager);
 };
 
 //-----------------------------------------------------------------------------
@@ -31,20 +33,11 @@ int main(int argc, char*argv[])
 {
   QApplication app(argc, argv);
   
-  QWidget topLevel;
-  QVBoxLayout * layout = new QVBoxLayout();
-  topLevel.setLayout(layout);
-  
-  QPushButton * restartButton = new QPushButton("Restart");
-  RestartManager restartManager;
-  QObject::connect(restartButton, SIGNAL(clicked()), &restartManager, SLOT(restart()));
-  layout->addWidget(restartButton);
-  
-  QPushButton * quitButton = new QPushButton("Quit");
-  QObject::connect(quitButton, SIGNAL(clicked()), &app, SLOT(quit()));
-  layout->addWidget(quitButton);
-  
-  topLevel.show();
+  ctkRestartManager restartManager;
+  ctkRestartWidget restartWidget;
+  restartWidget.setRestartManager(&restartManager);
+
+  restartWidget.show();
   
   return app.exec();
 }
