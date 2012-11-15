@@ -40,6 +40,8 @@ int mainLoop(int argc, char*argv[])
 {
   QApplication app(argc, argv);
   
+  qDebug() << "PID" << QApplication::applicationPid();
+  
   ctkRestartManager restartManager;
   ctkRestartWidget restartWidget;
   restartWidget.setRestartManager(&restartManager);

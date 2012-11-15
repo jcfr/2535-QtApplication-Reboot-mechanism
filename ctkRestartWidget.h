@@ -23,6 +23,8 @@ private:
   Q_DISABLE_COPY(ctkRestartWidget);
   
   QPushButton * EnableMsgHandlersButton;
+  QPushButton * EnableFDReadingButton;
+  QPushButton * DisableFDReadingButton;
   QPushButton * RestartButton;
   ctkAbstractRestartManager * RestartManager;
 };

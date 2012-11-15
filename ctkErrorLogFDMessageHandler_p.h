@@ -22,7 +22,6 @@
 #define __ctkErrorLogFDMessageHandler_p_h
 
 // Qt includes
-#include <QFile>
 #include <QMutex>
 #include <QThread>
 
@@ -33,7 +32,6 @@
 #include <cstdio>
 
 class ctkErrorLogFDMessageHandler;
-class QTextStream;
 
 // --------------------------------------------------------------------------
 // ctkFDHandler
@@ -57,15 +55,20 @@ public:
 
   /// Return if the handler is enabled. This methods is thread-safe.
   bool enabled()const;
+  
+  /// Convenient method that could be used for debugging purposes.
+  void appendToFile(const QString& fileName, const QString& text);
 
   FILE* terminalOutputFile();
 
 protected:
-  void init();
 
   void run();
 
 private:
+  void enableFileDescriptorRedirection();
+  void disableFileDescriptorRedirection();
+  
   ctkErrorLogFDMessageHandler * MessageHandler;
   ctkErrorLogLevel::LogLevel LogLevel;
 
@@ -75,11 +78,10 @@ private:
   fpos_t SavedFDPos;
 
   int          Pipe[2]; // 0: Read, 1: Write
-  QFile        RedirectionFile;
-  QTextStream* RedirectionStream;
 
   bool Initialized;
 
+  QMutex AppendToFileMutex;
   mutable QMutex EnableMutex;
   bool Enabled;
 };
